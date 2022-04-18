@@ -151,6 +151,8 @@ public:
 	}
 
 	void setXOffset(const int x);
+	// Rightmost position visible on timeline (disregards parent editor scrollbar)
+	TimePos getEnd();
 
 	void addToolButtons(QToolBar* _tool_bar );
 
@@ -218,6 +220,7 @@ private:
 	int m_posMarkerX;
 	float m_ppb;
 	Song::PlayPos & m_pos;
+	// Leftmost position visible in parent editor
 	const TimePos & m_begin;
 	const Song::PlayModes m_mode;
 	TimePos m_loopPos[2];

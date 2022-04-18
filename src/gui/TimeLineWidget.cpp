@@ -31,6 +31,7 @@
 
 
 #include "TimeLineWidget.h"
+#include "ConfigManager.h"
 #include "embed.h"
 #include "NStateButton.h"
 #include "GuiApplication.h"
@@ -110,6 +111,17 @@ void TimeLineWidget::setXOffset(const int x)
 {
 	m_xOffset = x;
 	if (s_posMarkerPixmap != nullptr) { m_xOffset -= s_posMarkerPixmap->width() / 2; }
+}
+
+
+
+
+TimePos TimeLineWidget::getEnd()
+{
+	// widget width - track label area - margins - 1
+	auto contentWidth = width() - m_xOffset - 9;
+	auto ticksPerPixel = TimePos::ticksPerBar() / m_ppb;
+    return m_begin + (contentWidth * ticksPerPixel);
 }
 
 
@@ -250,6 +262,14 @@ void TimeLineWidget::paintEvent( QPaintEvent * )
 	// Draw the main rectangle (inner fill only)
 	QRect outerRectangle( loopStart, loopRectMargin, loopRectWidth - 1, loopRectHeight - 1 );
 	p.fillRect( outerRectangle, loopPointsActive ? getActiveLoopBrush() : getInactiveLoopBrush());
+	
+	QRect leftHandle(loopStart, loopRectMargin, 5, loopRectHeight - 1);
+	QRect rightHandle(loopEndR - 5, loopRectMargin, 5, loopRectHeight - 1);
+	if (ConfigManager::inst()->value( "app", "loopmarkermode" ) == "Handles")
+	{
+		p.fillRect(leftHandle, Qt::magenta);
+		p.fillRect(rightHandle, Qt::magenta);	
+	}
 
 	// Draw the bar lines and numbers
 	// Activate hinting on the font
@@ -283,16 +303,17 @@ void TimeLineWidget::paintEvent( QPaintEvent * )
 		}
 	}
 
+	// Unneeded?
 	// Draw the main rectangle (outer border)
-	p.setPen( loopPointsActive ? getActiveLoopColor() : getInactiveLoopColor() );
-	p.setBrush( Qt::NoBrush );
-	p.drawRect( outerRectangle );
+	// p.setPen( loopPointsActive ? getActiveLoopColor() : getInactiveLoopColor() );
+	// p.setBrush( Qt::NoBrush );
+	// p.drawRect( outerRectangle );
 
 	// Draw the inner border outline (no fill)
-	QRect innerRectangle = outerRectangle.adjusted( 1, 1, -1, -1 );
-	p.setPen( loopPointsActive ? getActiveLoopInnerColor() : getInactiveLoopInnerColor() );
-	p.setBrush( Qt::NoBrush );
-	p.drawRect( innerRectangle );
+	// QRect innerRectangle = outerRectangle.adjusted( 1, 1, -1, -1 );
+	// p.setPen( loopPointsActive ? getActiveLoopInnerColor() : getInactiveLoopInnerColor() );
+	// p.setBrush( Qt::NoBrush );
+	// p.drawRect( innerRectangle );
 
 	// Only draw the position marker if the position line is in view
 	if (m_posMarkerX >= m_xOffset && m_posMarkerX < width() - s_posMarkerPixmap->width() / 2)
